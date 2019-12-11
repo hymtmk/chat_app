@@ -1,0 +1,24 @@
+
+
+//redux saga test action types
+export const FETCHING_DATA = 'FETCHING_DATA'
+export const FETCHING_DATA_SUCCESS = 'FETCHING_DATA_SUCCESS'
+export const FETCHING_DATA_FAILURE = 'FETCHING_DATA_FAILURE'
+
+
+//invite saga action types
+export const INVITING_DATA = 'INVITING_DATA'
+export const INVITING_DATA_SUCCESS = 'INVITING_DATA_SUCCESS'
+export const INVITING_DATA_FAILURE = 'INVITING_DATA_FAILURE'
+
+
+// login saga action types
+export const LOGIN_REQUEST = "LOGIN_REQUEST";
+export const LOGIN_SUCCESS = "LOGIN_SUCCESS";
+export const LOGIN_FAILURE = "LOGIN_FAILURE";
+export const LOGOUT_REQUEST = "LOGOUT_REQUEST";
+export const LOGOUT_SUCCESS = "LOGOUT_SUCCESS";
+export const LOGOUT_FAILURE = "LOGOUT_FAILURE";
+export const AUTH_REQUEST = "AUTH_REQUEST";
+export const VERIFY_REQUEST = "VERIFY_REQUEST";
+export const VERIFY_SUCCESS = "VERIFY_SUCCESS";

@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "875241797549",
+    "firebase_url": "https://whatsappp-c89b3.firebaseio.com",
+    "project_id": "whatsappp-c89b3",
+    "storage_bucket": "whatsappp-c89b3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:875241797549:android:0738f742c68f9ed03e5324",
+        "android_client_info": {
+          "package_name": "com.whatsappp"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "875241797549-csp8j084prpoetpoujhnp2a92vl54aff.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.whatsappp",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "875241797549-itphicg4mb9ab0d3t9q4akeunc22t8bc.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBKAd7C3HT8UfZOIyoWQabk3edKwMaEuOg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "875241797549-itphicg4mb9ab0d3t9q4akeunc22t8bc.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
