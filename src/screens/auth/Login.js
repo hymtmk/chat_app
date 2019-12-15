@@ -1,18 +1,22 @@
-import React,{useState,useRef,useEffect} from 'react';
-import {Text, View,StyleSheet,Keyboard,ScrollView,TouchableOpacity,Animated,
-  Dimensions,TextInput,StatusBar, Image,ImageBackground,} from 'react-native';
+import React,{ useState,useRef,useEffect } from 'react';
+import { Text, View,StyleSheet,Keyboard,ScrollView,TouchableOpacity,Animated,
+  Dimensions,TextInput,StatusBar, Image,ImageBackground, Alert, } from 'react-native';
 import firebase from 'react-native-firebase';
-import { ProgressDialog } from 'react-native-simple-dialogs';
-
 import CountryPicker from 'react-native-country-picker-modal';
-import {colors} from '../../res/style/colors'
-import {fontSizes} from '../../res/style/fontSize'
-import {fonts} from '../../res/style/fonts'
+import CodeInput from 'react-native-confirmation-code-input';
+import { ProgressDialog } from 'react-native-simple-dialogs';
+import { isValidPhoneNumber } from 'react-phone-number-input'
+import { colors } from '../../res/style/colors'
+import { fontSizes } from '../../res/style/fontSize'
+import { fonts } from '../../res/style/fonts'
+import { Transitioning, Transition } from 'react-native-reanimated';
+import { MaterialIcon } from '../../components/Shared/Index'
+import { moderateScale } from '../../res/style/scalingUnit'
+import { saveUserInfo } from '../../utils/db'
+
 import Logo from "../../res/assets/images/logo.png"
 import BackgroundImg from '../../res/assets/images/background.png'
-import { Transitioning, Transition } from 'react-native-reanimated';
-import {MaterialIcon,} from '../../components/Shared/Index'
-import {moderateScale} from '../../res/style/scalingUnit'
+
 
 const SCREEN_WIDTH = Math.round(Dimensions.get('window').width)
 const window = Dimensions.get('window')
@@ -22,12 +26,10 @@ const AnimatedTouchableOpacity = Animated.createAnimatedComponent(TouchableOpaci
 const MobileNumber = (props) => {
   
     const [cca2,setCca2] = useState('IN') // you can set ur country here
-    const [callingCode,setCallingCode] = useState('91') 
     const [name,setName] = useState('India')
-    const [phoneNumber,setPhoneNumber] = useState('')
   
     onTextChange = (phoneNumber) => {
-      setPhoneNumber(phoneNumber)
+      props.setPhoneNumber(phoneNumber)
     }
 
     return (
@@ -44,7 +46,7 @@ const MobileNumber = (props) => {
               closeable
               onChange={value => {
                 setCca2(value.cca2)
-                setCallingCode(value.callingCode)
+                props.setCallingCode(value.callingCode)
                 setName(value.name)
               }}
               filterable={true}
@@ -61,23 +63,23 @@ const MobileNumber = (props) => {
           <Text style={styles.subHead}>Your Mobile Number*</Text>
           <View style={styles.phoneNumberWrapper}>  
             <TextInput 
-            value={`+${callingCode}`}
-            style={styles.textInput}
-            editable={false}
+              value={`+${props.callingCode}`}
+              style={styles.textInput}
+              editable={false}
             />
             <View style={[styles.textInput,{marginLeft:10,flex:1,flexDirection:'row',alignItems:'center'}]}>
             <TextInput 
-             keyboardType='phone-pad'
-            // maxLength={10}
-             onChangeText={(text) => onTextChange(text)}
-             style={{padding:0,flex:1,fontSize : 18,
-              fontFamily: 'Poppins-Medium',
-              color : colors.black}}/>
-              {
-                phoneNumber.length === 10 && (
-                  <MaterialIcon size={22} color="#25D366" name="check-circle"/>
-                )
-              }
+              keyboardType='phone-pad'
+              // maxLength={10}
+              onChangeText={(text) => onTextChange(text)}
+              style={{padding:0,flex:1,fontSize : 18,
+                fontFamily: 'Poppins-Medium',
+                color : colors.black}}/>
+                {
+                  props.phoneNumber.length === 10 && (
+                    <MaterialIcon size={22} color="#25D366" name="check-circle"/>
+                  )
+                }
             </View>
           </View>
          </View>
@@ -86,52 +88,25 @@ const MobileNumber = (props) => {
     ) 
 }
 
-const OtpScreen = () => {
-  return (
+const OtpScreen = (props) => {
+    onFullChange = (inputCode) => {
+      console.log("input code:" + inputCode)
+      props.setVerificationCode(inputCode)
+    }
+    return (
         <View style={{flex:1}}>
           <View style={{marginTop:20,}}>
-           <Text style={styles.loginHeadText}>Waiting to automatically detect and sms send to +91 7715046761</Text>
+            <Text style={styles.loginHeadText}>Waiting to automatically detect and sms send to +{props.phoneNumber}</Text>
           </View>
           <View style={styles.otpTextInputContainer}>
-           <TextInput
-            ref={input => {
-             this.firstTextInput = input;
-            }}
-            onChangeText={(event) => { event && this.secondTextInput.focus() }}
-            keyboardType='phone-pad' style={styles.otpTextInput} maxLength={1}/>
-           <TextInput 
-            ref={input => {
-              this.secondTextInput = input;
-            }}
-            onKeyPress={({ nativeEvent: { key: keyValue } }) => {
-              if (keyValue === 'Backspace') {
-                this.firstTextInput.focus();
-            }
-            }}
-            onChangeText={(event) => { event && this.thirdTextInput.focus() }}
-            keyboardType='phone-pad' style={styles.otpTextInput} maxLength={1}/>
-           <TextInput 
-            ref={input => {
-             this.thirdTextInput = input;
-            }}
-            onKeyPress={({ nativeEvent: { key: keyValue } }) => {
-              if (keyValue === 'Backspace') {
-                this.secondTextInput.focus();
-            }
-            
-            }}
-            onChangeText={(event) => { event && this.fourTextInput.focus() }}
-            keyboardType='phone-pad' style={styles.otpTextInput} maxLength={1}/>
-           <TextInput 
-            ref={input => {
-             this.fourTextInput = input;
-            }}
-            onKeyPress={({ nativeEvent: { key: keyValue } }) => {
-              if (keyValue === 'Backspace') {
-                this.thirdTextInput.focus();
-            }
-            }}
-            keyboardType='phone-pad' style={styles.otpTextInput} maxLength={1}/>
+          <CodeInput
+            keyboardType="numeric"
+            codeLength={6}
+            className='border-b'
+            autoFocus={false}
+            codeInputStyle={styles.textInput}
+            onFulfill={(code) => onFullChange(code)}            
+          />
           </View>
           <View style={{marginTop: 30}}>
             <Text style={styles.otpSubText}>
@@ -150,34 +125,59 @@ const Login = props => {
     const [callingCode,setCallingCode] = useState('91') 
     const [phoneNumber,setPhoneNumber] = useState('')
     const [message, setMessage] = useState('')
+    const [confirmResult, setConfirmResult] = useState(null);
+    const [verificationCode, setVerificationCode] = useState('')
+
 
     const ref = useRef();
     
     const onLogin = () => {
-      var fullPhonenumber = "+" + callingCode + phoneNumber
-      console.log("Phone Number: " + fullPhonenumber)
-      setMessage("Sending code...")
-      firebase.auth().signInWithPhoneNumber( fullPhonenumber )
-            .then( confirmResult => {
-                setMessage("")
-                console.log("Success Login!")
-                // setMessage("Code has been sent")
-                // requestAnimationFrame quite useful to give better experience when we click on button
-                requestAnimationFrame(() => { 
-                    Keyboard.dismiss()
-                    setIsOtpSend(!isOtpSend)
-                    ref.current.animateNextTransition();
-                })
-            })
-          .catch( error => setMessage(""))
-      
+      var fullPhonenumber = "+" + callingCode + phoneNumber      
+      if(phoneNumber.trim() == "")
+      {
+        alert('Please input the phone number.')
+        return
+      }
+      if(isValidPhoneNumber(fullPhonenumber) === false)
+      {
+        alert('The phone number you entered is not valid.')
+      }
+      else{
+        setMessage("Sending code...")
+        firebase.auth().signInWithPhoneNumber( fullPhonenumber )
+              .then( confirmResult => {
+                  setMessage("")
+                  setConfirmResult(confirmResult)
+                  // setMessage("Code has been sent")
+                  // requestAnimationFrame quite useful to give better experience when we click on button
+                  requestAnimationFrame(() => { 
+                      Keyboard.dismiss()
+                      setIsOtpSend(!isOtpSend)
+                      ref.current.animateNextTransition()
+                  })
+              })
+            .catch( error => setMessage(""))  
+      }      
     }
 
     const onOtpConfirm = () => {
-      requestAnimationFrame(() => {
-        Keyboard.dismiss()
-        props.navigation.navigate("App")
-      })  
+      if(confirmResult != null && verificationCode.trim() != ""){
+        confirmResult.confirm(verificationCode)
+            .then((user) => {
+                requestAnimationFrame(() => {                
+                  Keyboard.dismiss()
+                  var fullPhonenumber = "+" + callingCode + phoneNumber
+                  props.navigation.replace("UserProfile", {
+                      phoneNumber: fullPhonenumber
+                  });
+                })      
+              // save user state
+            })
+            .catch(error => {
+                alert('Failed to verify code. Please try again.');
+        });
+        console.log("Confirm result: " + confirmResult)
+      }
     }
 
     useEffect(() => {
@@ -259,8 +259,10 @@ const Login = props => {
             transition={transition}
             style={styles.wrapper}> 
             {
-             isOtpSend ? <OtpScreen/>: <MobileNumber phoneNumber = {phoneNumber} setPhoneNumber = {setPhoneNumber} 
-             callingCode = { callingCode} setCallingCode = {setCallingCode}/>
+              isOtpSend ? <OtpScreen phoneNumber = {callingCode + phoneNumber}
+                                     setVerificationCode = {setVerificationCode}/>:
+                          <MobileNumber phoneNumber = {phoneNumber} setPhoneNumber = {setPhoneNumber} 
+              callingCode = { callingCode} setCallingCode = {setCallingCode}/>
             }
           </Transitioning.View>
          
@@ -271,7 +273,6 @@ const Login = props => {
           <View >
               <ProgressDialog
                   style = {styles.progressDialog}
-                  activityIndicatorColor = "blue"
                   activityIndicatorSize = "large"
                   animationType = "slide"
                   message = { message }
@@ -414,7 +415,7 @@ const styles = StyleSheet.create({
       borderBottomColor : colors.primary,
       fontFamily: fonts.Medium,
       color : colors.primary,
-      width: SCREEN_WIDTH/5,
+      width: SCREEN_WIDTH/2,
       marginRight: 10,
       fontSize: 24,
       textAlign: "center",

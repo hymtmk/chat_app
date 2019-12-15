@@ -1,8 +1,10 @@
 import {createStackNavigator, createSwitchNavigator, createAppContainer} from "react-navigation"
 
+import Splash from "./screens/auth/Splash"
 import Login from "./screens/auth/Login"
+import Profile from "./screens/auth/Profile"
 
-import Dashboard from "./screens/app/Dashboard";
+import Dashboard from "./screens/app/Dashboard"
 import Contact from './screens/app/Contact'
 import ChatScreen from './screens/app/ChatScreen'
 import CameraScreen from './screens/app/CameraScreen'
@@ -17,14 +19,31 @@ import InviteFriend from './screens/app/InviteFriend'
 import EditProfile from './screens/app/EditProfile'
 
 // Auth Stack Navigation
-const Auth = createStackNavigator({
-    LoginScreen: {
-        screen: Login,
-        navigationOptions: {
-            header: null
+const Auth = createStackNavigator(
+    {
+        SplashScreen: {
+            screen: Splash,
+            navigationOptions: {
+                header: null
+            }
+        },
+        LoginScreen: {
+            screen: Login,
+            navigationOptions: {
+                header: null
+            }
+        },
+        UserProfile: {
+            screen: Profile,
+            navigationOptions: {
+                header: null
+            }
         }
+    }, 
+    {
+        initialRouteName: 'SplashScreen'
     }
-})
+)
 
 // Main App Stack Navigation
 const App = createStackNavigator({  
