@@ -48,6 +48,20 @@ const Profile = props => {
     // Progress Dialog message
     const [message, setMessage] = useState('')
 
+    useEffect(() => {
+      console.log("phoneNumber:" + userData.phone)
+      firebase.database().ref('UserList')
+        .once("value", userData.phone)
+        .then(function(data)
+        {          
+          console.log("data:" + data)  
+        })
+        .catch((error) => {
+          console.log("error:" + error )
+        })
+     
+  
+    }, []); // passing an empty array as second argument triggers the callback in useEffect only after the initial render thus replicating `componentDidMount` lifecycle behaviour
     // save or update database
     onSaveOrUpdate = () => {
       setIsLoading(true)
