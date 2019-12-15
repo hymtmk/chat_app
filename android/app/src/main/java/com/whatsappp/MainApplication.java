@@ -5,8 +5,11 @@ import android.app.Application;
 import io.invertase.firebase.auth.RNFirebaseAuthPackage;
 import io.invertase.firebase.database.RNFirebaseDatabasePackage;
 import io.invertase.firebase.storage.RNFirebaseStoragePackage;
+import io.invertase.firebase.messaging.RNFirebaseMessagingPackage; 
 
 import com.facebook.react.ReactApplication;
+import com.imagepicker.ImagePickerPackage;
+import com.reactnativecommunity.asyncstorage.AsyncStoragePackage;
 import io.invertase.firebase.RNFirebasePackage;
 import com.swmansion.reanimated.ReanimatedPackage;
 import org.reactnative.camera.RNCameraPackage;
@@ -32,12 +35,15 @@ public class MainApplication extends Application implements ReactApplication {
     protected List<ReactPackage> getPackages() {
       return Arrays.<ReactPackage>asList(
           new MainReactPackage(),
+            new ImagePickerPackage(),
+            new AsyncStoragePackage(),
             new RNFirebasePackage(),
             new ReanimatedPackage(),
             new RNCameraPackage(),
             new RNGestureHandlerPackage(),
             new VectorIconsPackage(),
             new RNFirebaseAuthPackage(),
+            new RNFirebaseMessagingPackage(),
             new RNFirebaseDatabasePackage(),
             new RNFirebaseStoragePackage()
       );
