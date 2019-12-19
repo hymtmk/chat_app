@@ -10,7 +10,7 @@ import {chatDetails} from "../../res/data/data"
 import {MoneyChat,GalleryChat} from '../../components/ChatComponents/ChatType'
 
 import {moderateScale} from '../../res/style/scalingUnit'
-import { onSendSingleChat } from '../../utils/message.js'
+import { onSendGroupChat } from '../../utils/message.js'
 
 import posed,{Transition} from 'react-native-pose';
 import firebase from 'react-native-firebase'
@@ -90,14 +90,14 @@ const attachmentIconConfig = {
 const AttachmentView = posed.View(config)
 const AttachmentIcon = posed.View(attachmentIconConfig)
 
-const ChatScreen = (props) => {
+const GroupChatScreen = (props) => {
 
    const chatid = props.navigation.getParam('chatid')
    const isLoaded = useRef(false);
    const [myid, setId] = useState(props.navigation.getParam('myid'))
    const [uri, setUri] = useState(props.navigation.getParam('uri'))
-   const [username, setUsername] = useState(props.navigation.getParam('userName'))
-   const [status, setStatus] = useState(props.navigation.getParam('isOnline'))
+   const [groupName, setGroupName] = useState(props.navigation.getParam('groupName'))
+   const [status, setStatus] = useState(true)
    const [messages, setMessages] = useState([])
    const [text, setTextMessage] = useState('')
    const [isAttachmentContentShow, setAttachmentContentShow] = useState(false)
@@ -127,7 +127,7 @@ const ChatScreen = (props) => {
     if(text.length === 0)
       return
     // send message
-    onSendSingleChat(chatid, myid, text, '', '', 'TEXT')
+    onSendGroupChat(chatid, myid, text, '', '', 'TEXT')
 
     setTextMessage('')
    }
@@ -155,7 +155,7 @@ const ChatScreen = (props) => {
     onMessage = async () => {
       let chatMsg = []
       snapshot = await firebase.database()
-      .ref('MessageList')
+      .ref('GroupMessageList')
       .child(chatid)
       .on('child_added', snapshot => {
         const message = {
@@ -180,7 +180,7 @@ const ChatScreen = (props) => {
       onMessage()
       return() =>{
         isLoaded.current = true;
-        console.log('Chat Screen useEffect returned' + isLoaded.current)
+        console.log('GroupChat Screen useEffect returned' + isLoaded.current)
       }
     },[])
 
@@ -200,14 +200,15 @@ const ChatScreen = (props) => {
       })
     }
 
-    const onProfile = () => {
-
+    const onGroupInfo = () => {
+/*
       props.navigation.navigate('ContactProfileScreen', {
         id,
         uri,
         username,
         status
       })
+*/      
     }
 
     onCall = () => {
@@ -224,17 +225,14 @@ const ChatScreen = (props) => {
         <View style={styles.headerContainer}>
          <View style={styles.firstRow}>
           <MaterialIcon onPress={() => {props.navigation.goBack()}} name="arrow-left" size={24} color={colors.primary} />
-           <TouchableOpacity activeOpacity={.8} onPress={onProfile} style={styles.userDetail}>
+           <TouchableOpacity activeOpacity={.8} onPress={onGroupInfo} style={styles.userDetail}>
               <View style={[styles.img,{backgroundColor:colors.lightGrey}]}>
                <Image style={styles.img} source={{uri}}/>
-              </View>
-              <OnlineOffline userWrapperStyle={styles.userWrapperStyle} userContainerStyle={styles.userContainerStyle} isOnline={status} />
-              <Text style={styles.searchText}>{username}</Text>
+              </View>              
+              <Text style={styles.searchText}>{groupName}</Text>
           </TouchableOpacity>
          </View>
-         <View style={styles.secondRow}>
-          <MaterialIcon name="video" size={24} color={colors.primary} />
-          <MaterialIcon onPress={onCall} name="phone" size={24} color={colors.primary} />
+         <View style={styles.endRow}>
           <MaterialIcon name="dots-horizontal-circle" size={24} color={colors.primary} />
          </View>
         </View>
@@ -246,23 +244,26 @@ const ChatScreen = (props) => {
               const messageType = chats.messageType === 'MONEY'        
               return(
                 <View key={chats.key} style={[isSend ? styles.sentContainer : styles.receivedContainer,styles.inverted]}>
-                 <View style={{  paddingVertical: 4,paddingHorizontal: 6,}}>
-                  <View 
-                   style={[[styles.bubble,messageType && { paddingVertical: 0,
-                    paddingHorizontal: 0,}],isSend ? [styles.sent,styles.sendBorderRadiusStyle,messageType && {backgroundColor:'transparent',padding:0}] : [styles.received,styles.receivedBorderRadiusStyle,messageType && {backgroundColor:'transparent'}]]}>
-                   {
-                     chatType(chats.messageType,isSend,chats.text,chats.uri)
-                   }
-                   </View>
-                   <View style={[styles.timeContainer,isSend && {justifyContent:'flex-end'}]}>
-                   <Text style={styles.timeText}>{chats.timeStamp}</Text>
-                   {
-                     isSend && (
-                      <MaterialIcon  style={styles.checkMarkIcon} name="check-all" color={colors.primary} size={14} />
-                     )
-                   }
-                     </View>
-                 </View>
+                  <View style={{  paddingVertical: 4,paddingHorizontal: 6,}}>
+                    <View style = {styles.msgRow}>
+                      {!isSend && <Image style={styles.img} source={{uri: chats.uri}}/>}
+                      <View 
+                        style={[[styles.bubble,messageType && { paddingVertical: 0,
+                          paddingHorizontal: 0,}],isSend ? [styles.sent,styles.sendBorderRadiusStyle,messageType && {backgroundColor:'transparent',padding:0}] : [styles.received,styles.receivedBorderRadiusStyle,messageType && {backgroundColor:'transparent'}]]}>
+                        {
+                          chatType(chats.messageType,isSend,chats.text,chats.uri)
+                        }
+                      </View>
+                    </View>
+                    <View style={[styles.timeContainer,isSend && {justifyContent:'flex-end'}]}>
+                      <Text style={styles.timeText}>{chats.timeStamp}</Text>
+                      {
+                        isSend && (
+                          <MaterialIcon  style={styles.checkMarkIcon} name="check-all" color={colors.primary} size={14} />
+                        )
+                      }
+                    </View>
+                  </View>
                 </View>
               )
             }).reverse()
@@ -353,6 +354,17 @@ const styles = StyleSheet.create({
         justifyContent : 'space-around',
         alignItems : 'center'
       },
+    endRow : {
+      flexDirection : 'row',
+      width : '40%',
+      justifyContent : 'flex-end',
+      alignItems : 'center'
+    },
+    msgRow : {
+      flexDirection : 'row',      
+      justifyContent : 'space-around',
+      alignItems : 'center'
+    },
     img : {
         width : 50,
         height: 50,
@@ -511,4 +523,4 @@ const styles = StyleSheet.create({
   }
 })
 
-export default ChatScreen
+export default GroupChatScreen

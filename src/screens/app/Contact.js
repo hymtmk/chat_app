@@ -3,6 +3,7 @@ import { Text, View,StyleSheet, StatusBar,InteractionManager,ScrollView } from '
 import {colors} from '../../res/style/colors'
 import {fontSizes} from '../../res/style/fontSize'
 import {fonts} from '../../res/style/fonts'
+import firebase from 'react-native-firebase'
 import MaterialIcon from '../../components/Shared/MaterialIcon'
 import Feather from 'react-native-vector-icons/Feather'
 import ContactList from '../../components/ContactComponents/ContactList'
@@ -25,14 +26,22 @@ const Contact = (props) => {
     const [data,setData] = useState([])
     const [isDataLoad,setIsDataLoad] = useState(false)
 
-    useEffect(() => {
-      InteractionManager.runAfterInteractions(() => {
-         const {myContacts} = require('../../res/data/data')
-         setData(myContacts)
-         setIsDataLoad(true);
-      });
+    // phoneNumber from Dashbaord
+    const [phoneNumber, setPhoneNumber] = useState(props.navigation.getParam('phoneNumber'))
+    useEffect(() => {      
+        fetchContacts()        
     },[])
-
+    fetchContacts = async () => {
+      let promises = []
+      snapshot = await firebase.database().ref('UserList').once('value')
+      snapshot.forEach(item => {        
+        if(item.key !== phoneNumber){
+          promises.push(item.val())  
+        }
+      })
+      setData(promises)
+      setIsDataLoad(true);
+    }
     return (
       <View style={styles.container}>
         <StatusBar backgroundColor={colors.white} barStyle="dark-content" />
@@ -52,10 +61,17 @@ const Contact = (props) => {
         { isDataLoad &&
          <Overlay key="contact">
           {
-            data.map((item) => (
-              <ContactList key={item.id} navigation={props.navigation} id={item.id} 
-              uri={item.avatar} userName={item.name} isOnline={item.isOnline} 
-              status={item.status} showCallIcon={showCallIcon}/>  
+            data.map((item) => (              
+              <ContactList 
+                key = {item.phone}
+                myid={phoneNumber} 
+                userid={item.phone} 
+                uri={item.avatar} 
+                userName={item.name} 
+                isOnline={true} 
+                status={'I am using WhatsApp'} 
+                showCallIcon={showCallIcon}
+                navigation={props.navigation} />  
             ))
           }
          </Overlay>

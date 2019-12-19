@@ -1,4 +1,4 @@
-import React,{useState} from 'react'
+import React,{useState, useEffect} from 'react'
 import { Text, View,StyleSheet,Image,StatusBar,TouchableOpacity,Modal,Dimensions} from 'react-native'
 import {colors} from '../../res/style/colors'
 import {fontSizes} from '../../res/style/fontSize'
@@ -8,6 +8,7 @@ import Icon from 'react-native-vector-icons/Entypo'
 import Feather from 'react-native-vector-icons/Feather'
 import {OnlineOffline} from '../../components/Shared/Index'
 import { TabView, SceneMap,TabBar } from 'react-native-tab-view';
+import { loadUserData } from '../../utils/db.js'
 import Animated from 'react-native-reanimated';
 import Camera from './tab_navigation/Camera';
 import Chat from './tab_navigation/Chat'
@@ -25,17 +26,31 @@ const TAB_TRANSLATE = -50 // translateY
 const Dashboard = (props) => {
    
     const [modalVisible,setModalVisible] = useState(false)
-    const [index,setIndex] = useState(1)
+    const [index,setIndex] = useState(0)
     const [routes,setRoutes] = useState([
-      { key: 'camera', title: 'Camera' },
       { key: 'chat', title: 'Chat' },
       { key: 'groups', title: 'Groups' },
       { key: 'calls', title: 'Calls' },
     ],)
+    const [userData, setUserData] = useState([{
+      name: '',
+      phone: '',
+      avatar: ''
 
+    }])
     //track position of tabs for animation
     const [position,setPosition] = useState(new Animated.Value(1))  
     
+    useEffect(() => {
+     
+      loadUserData((err, result) => {
+          if(result){
+            let data = JSON.parse(result);
+            setUserData(data)            
+          } 
+      })
+    }, []); // passing an empty array as second argument triggers the callback in useEffect only after the initial render thus replicating `componentDidMount` lifecycle behaviour
+
     onOption = () => {
       requestAnimationFrame(() => {
        setModalVisible(true)
@@ -51,37 +66,39 @@ const Dashboard = (props) => {
 
     //change bottom icon based on tab
     const setBottomIconName = (screen) =>{
-     if(screen === 1){
+     if(screen === 0){
        return "android-messages"
-     } else if(screen === 2){
+     } else if(screen === 1){
        return "account-multiple-plus"
-     } else if(screen === 3){
+     } else if(screen === 2){
        return "phone-plus"
      }
     }
 
     const setOnPress = (screen) => {
-     if(screen === 1){
+     if(screen === 0){
       return onContact
+     } else if(screen === 1){
+      return onNewGroup
      } else if(screen === 2){
-      return onCreateGroup
-     } else if(screen === 3){
       return onAddCall
      }
     }
 
     onContact = () => {
-      // requestAnimationFrame(() => {
-      //   props.navigation.navigate('Contact',{
-      //   showCallIcon : false
-      //  })
-      // })
-
+       requestAnimationFrame(() => {
+         props.navigation.navigate('Contact',{
+         showCallIcon : false,
+         phoneNumber: userData.phone
+        })
+       })
+/*
       requestAnimationFrame(() => {
         props.navigation.navigate('InviteFriend',{
         showCallIcon : false
        })
       })
+*/      
     }
 
     onAddCall = () => {   
@@ -92,7 +109,14 @@ const Dashboard = (props) => {
        })   
     }
 
-   onCreateGroup = () => {}
+   onNewGroup = () => {
+    requestAnimationFrame(() => {
+      props.navigation.navigate('NewGroup',{
+      showCallIcon : false,
+      phoneNumber: userData.phone
+     })
+    })
+   }
   
   //I used this in renderLabel because i want camera icon in my tab bar..
   const getLabel = ({route,color}) => {
@@ -110,32 +134,35 @@ const Dashboard = (props) => {
     //tab position will change to 0 means to camera then header will get change to translateY
     const animateTranslateY = interpolate(position,{ 
       inputRange : [0,1,2],
-      outputRange : [-HEADER_HEIGHT,0,0 ],
+      outputRange : [0,0,0 ],
     })
   
     //tab position will change to 0 means to camera then tabBar will get change to translateY
     const tabTranslateY = interpolate(position,{ 
      inputRange : [0,1,2],
-     outputRange : [TAB_TRANSLATE,HEADER_HEIGHT,HEADER_HEIGHT ],
+     outputRange : [HEADER_HEIGHT,HEADER_HEIGHT,HEADER_HEIGHT ],
     })    
    
     //tab position will change to 0 means to camera then bottom button opacity change
     const opacity = interpolate(position,{ 
       inputRange : [0,1],
-      outputRange : [0,1],
+      outputRange : [1,1],
       extrapolate : Extrapolate.CLAMP
     })    
 
     return (
       <View style={styles.container} onStartShouldSetResponder={() => setModalVisible(false) }>
-         <StatusBar backgroundColor={index===0 ? "#000" : colors.white} animated={true} barStyle="dark-content" />
+         <StatusBar backgroundColor={index===-1 ? "#000" : colors.white} animated={true} barStyle="dark-content" />
          <Animated.View style={[styles.headerWrapper, {transform:[{translateY : animateTranslateY}]}]}>
            <Animated.View style={[styles.headerCol,{transform:[{translateY : animateTranslateY}]}]}>
             <View style={[styles.profileImg,styles.imgWrapper]}>
-             <Image style={styles.profileImg} source={{uri:'http://tiny.cc/whatsapp_profile'}}/>
+             <Image style={styles.profileImg} source={
+               userData.avatar !== ''
+              ? { uri: userData.avatar}
+              : require ('../../res/assets/images/profile.png')}/>
             </View>
             <OnlineOffline userWrapperStyle={styles.userWrapperStyle} isOnline={true} />
-            <Text style={styles.userNameText}>Hi, Damon</Text>
+            <Text style={styles.userNameText}>{userData.name}</Text>
            </Animated.View>
            <Animated.View style={[styles.headerCol,{transform:[{translateY : animateTranslateY}]}]}>
              <Feather style={styles.icon} name="search" size={24} color={colors.primary} />
@@ -157,8 +184,7 @@ const Dashboard = (props) => {
                 indicatorStyle={{backgroundColor:colors.primary}}
               />}
             navigationState={{index,routes}}
-            renderScene={SceneMap({
-              camera: Camera,
+            renderScene={SceneMap({              
               chat: Chat,
               groups : Group,
               calls : Calls
@@ -169,7 +195,7 @@ const Dashboard = (props) => {
             initialLayout={{ width: Dimensions.get('window').width }}
           />
          </Animated.View>
-          { index !==0 && (
+          { /*index !==-1 &&*/ (
               <AnimatedTouchable activeOpacity={.8} onPress={setOnPress(index)}  style={[styles.messageIconWrapper,{opacity}]}>
                 <AnimateIcon name={setBottomIconName(index)} color={colors.white} size={26}/>
               </AnimatedTouchable>
