@@ -14,6 +14,7 @@ const Splash = props => {
      
         loadUserData((err, result) => {
             if(result){
+                let jsonData = JSON.parse(result)
                 props.navigation.navigate("App")
             } else 
                 props.navigation.replace("LoginScreen")

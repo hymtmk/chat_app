@@ -1,8 +1,8 @@
 import {FETCHING_DATA} from './actionType'
 import {INVITING_DATA} from './actionType'
-import {AUTH_REQUEST} from './actionType'
-import {VERIFY_REQUEST} from './actionType'
-import {VERIFY_SUCCESS} from './actionType'
+import {FETCHING_PROFILE} from './actionType'
+import {FETCHING_PROFILE_SUCCESS} from './actionType'
+import {FETCHING_PROFILE_FAILURE} from './actionType'
 
 
 //test saga
@@ -13,58 +13,14 @@ export function fetchData() {
 }
 
 //invite action
-export function inviteData (a, b) {  
+export function inviteData (from, to) {  
 
   return {
     type: INVITING_DATA,
-    a,
-    b,
+    from,
+    to,
   }
 }
-
-//requestLogin action
-export const requestLogin = () => {
-  return {
-    type: LOGIN_REQUEST
-  };
-};
-
-//loginError action
-const loginError = () => {
-  return {
-    type: LOGIN_FAILURE
-  };
-};
-
-const requestLogout = () => {
-  return {
-    type: LOGOUT_REQUEST
-  };
-};
-
-const receiveLogout = () => {
-  return {
-    type: LOGOUT_SUCCESS
-  };
-};
-
-const logoutError = () => {
-  return {
-    type: LOGOUT_FAILURE
-  };
-};
-
-const verifyRequest = () => {
-  return {
-    type: VERIFY_REQUEST
-  };
-};
-
-const verifySuccess = () => {
-  return {
-    type: VERIFY_SUCCESS
-  };
-};
 
 export const loginUser = (email, password) => dispatch => {
   dispatch(requestLogin());

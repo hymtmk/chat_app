@@ -6,7 +6,9 @@ import Profile from "./screens/auth/Profile"
 
 import Dashboard from "./screens/app/Dashboard"
 import Contact from './screens/app/Contact'
+import NewGroup from './screens/app/NewGroup'
 import ChatScreen from './screens/app/ChatScreen'
+import GroupChatScreen from './screens/app/GroupChatScreen'
 import CameraScreen from './screens/app/CameraScreen'
 import PhotoPreviewScreen from './screens/app/PhotoPreviewScreen'
 import Setting from './screens/app/Setting'
@@ -59,6 +61,12 @@ const App = createStackNavigator({
             header: null
         }
     }, 
+    GroupChatScreen : {
+        screen : GroupChatScreen,
+        navigationOptions: {
+            header: null
+        }
+    },     
     ContactProfileScreen: {
         screen: ContactProfileScreen,
         navigationOptions: {
@@ -70,7 +78,13 @@ const App = createStackNavigator({
         navigationOptions: {
             header: null
         }
-    }, 
+    },
+    NewGroup : {
+        screen : NewGroup,
+        navigationOptions: {
+            header: null
+        }
+    },  
     CameraScreen : {
         screen : CameraScreen,
         navigationOptions: {

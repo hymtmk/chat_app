@@ -13,14 +13,14 @@ import {
   StyleSheet,
   ImageBackground
 } from 'react-native'
-import firebase from 'react-native-firebase';
+import firebase from 'react-native-firebase'
 import ImagePicker from 'react-native-image-picker'
 import {colors} from '../../res/style/colors'
 import { fontSizes } from '../../res/style/fontSize'
 import { fonts } from '../../res/style/fonts'
 import { getFileName } from '../../utils/utils'
 import { saveUserInfo } from '../../utils/db'
-import { ProgressDialog } from 'react-native-simple-dialogs';
+import { ProgressDialog } from 'react-native-simple-dialogs'
 import { moderateScale } from '../../res/style/scalingUnit'
 
 import Logo from "../../res/assets/images/logo.png"
@@ -32,13 +32,9 @@ const window = Dimensions.get('window')
 const Profile = props => {
     const [isLoading, setIsLoading] = useState(false)
     const [isFromFile, setIsFromFile] = useState(false)    
-    const [userData, setUserData] = useState({
-      id: '', 
-      phone: props.navigation.getParam('phoneNumber'),
-      name: '',
-      avatar: '',
-      email: ''
-    })
+    // user information
+    const [phone, setPhone] = useState(props.navigation.getParam('phoneNumber'))
+    const [name, setName] = useState('')
     // local avatar file info
     const [localAvatar, setLocalAvatar] = useState('')
     const [localAvatarFileName, setLocalAvatarFileName] = useState('')
@@ -48,22 +44,17 @@ const Profile = props => {
     // Progress Dialog message
     const [message, setMessage] = useState('')
 
-    useEffect(() => {
-      console.log("phoneNumber:" + userData.phone)
-      firebase.database().ref('UserList')
-        .once("value", userData.phone)
-        .then(function(data)
-        {          
-          console.log("data:" + data)  
-        })
-        .catch((error) => {
-          console.log("error:" + error )
-        })
-     
-  
-    }, []); // passing an empty array as second argument triggers the callback in useEffect only after the initial render thus replicating `componentDidMount` lifecycle behaviour
+    // navigate to App
+    navigateToAppScreen = () => {
+      console.log('Verification code saved')
+      requestAnimationFrame(() => {                
+        Keyboard.dismiss()
+        props.navigation.navigate("App")
+        setIsLoading(false)       
+      })      
+    }
     // save or update database
-    onSaveOrUpdate = () => {
+    onSaveOrUpdate = async () => {
       setIsLoading(true)
 /*
       if(avatarRef !== ''){
@@ -71,8 +62,8 @@ const Profile = props => {
           .delete()
       }
 */    
-      console.log("User name: " + userData.name)
-      if(userData.name == '')
+      console.log("User name: " + name)
+      if(name == '')
       {
         // if userName is empty
         alert('Please input your name')
@@ -80,37 +71,21 @@ const Profile = props => {
       }
       else{
         console.log('avatar:' + avatarSource)
-        setUserData({
-          id: userData.id,
-          phone: userData.phone,
-          name: userData.name,                
-          avatar: avatarSource,
-          email: userData.email}
-        )
-        firebase.database().ref('UserList')
-        .push(userData)
-        .then(function(data)
-        {
-          let jsonData = JSON.stringify(userData)
-          console.log("data:" + jsonData)  
-          saveUserInfo(jsonData).then(() => {
-            console.log('Verification code saved')
-            requestAnimationFrame(() => {                
-              Keyboard.dismiss()
-              props.navigation.navigate("App")
-              setIsLoading(false)       
-            })      
-          })  
-        })
-        .catch((error) => {
-          console.log("error:" + error )
-        })
+        let data = {
+          phone: phone,
+          name: name,
+          avatar: avatarSource
+        }
+        await firebase.database().ref('UserList').child(phone).set(data)
+        let jsonData = JSON.stringify(data)
+        await saveUserInfo(jsonData);
+        navigateToAppScreen()
       }        
     }
     
     // called when user select avatar
-    selectAvatar = () => {
-      ImagePicker.showImagePicker(null, response => {
+    selectAvatar = async () => {
+      ImagePicker.showImagePicker(null, async response => {
         if (response.didCancel) {
           // console.log('User cancelled image picker')
         } else if (response.error) {
@@ -123,18 +98,12 @@ const Profile = props => {
           
           //upload avatar to server
           setIsLoading(true)
-          firebase.storage().ref('/profilePics/' + getFileName(response.fileName))
-          .putFile(response.path)
-          .then(function(data)
-          {
-            setAvatarRef(data.ref)
-            setAvatarSource(data.downloadURL)
-            setIsLoading(false)
-          })
-          .catch((error) => {
-              console.log('Error', error);
-              setIsLoading(false)
-          })
+          if(avatarRef !== '')
+            await firebase.storage().ref(avatarRef).delete()
+          const rImage = await firebase.storage().ref('/profilePics/' + getFileName(response.fileName)).putFile(response.path)
+          setAvatarRef(rImage.ref)
+          setAvatarSource(rImage.downloadURL)
+          setIsLoading(false)
         }
       })
     }
@@ -154,13 +123,10 @@ const Profile = props => {
           style={styles.textInput}
           underlineColorAndroid={'transparent'}
           placeholder={'Your Name'}
-          onChangeText={text => (setUserData({
-            id: userData.id,
-            phone: userData.phone,
-            name: text,                
-            avatar: userData.avatar,
-            email: userData.email}))}
-          value={userData.name}
+          onChangeText={text => (
+            setName(text)
+          )}
+          value={name}
         />
         {isLoading ? (
           <ActivityIndicator
@@ -209,7 +175,7 @@ const Profile = props => {
                   animationType = "slide"
                   message = { message }
                   visible = { message.length > 0 ? true : false }/>
-            </View>
+          </View>
         </ScrollView>
 
     )

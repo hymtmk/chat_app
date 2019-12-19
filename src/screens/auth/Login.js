@@ -135,7 +135,7 @@ const Login = props => {
       var fullPhonenumber = "+" + callingCode + phoneNumber      
       if(phoneNumber.trim() == "")
       {
-        alert('Please input the phone number.')
+        alert('Enter the phone number.')
         return
       }
       if(isValidPhoneNumber(fullPhonenumber) === false)
