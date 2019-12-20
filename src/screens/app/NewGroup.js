@@ -95,11 +95,11 @@ const NewGroup = (props) => {
           selectedCount++
       })        
       if(selectedCount<1){
-        Toast.showWithGravity("Please select persons to add", Toast.LONG, Toast.CENTER)
+        Toast.showWithGravity("Please select persons to add", Toast.LONG, Toast.BOTTOM)
         return
       }
       if(groupName.trim() == ''){
-        Toast.showWithGravity("Provide a group subject and optional group icon", Toast.LONG, Toast.CENTER)
+        Toast.showWithGravity("Provide a group subject and optional group icon", Toast.LONG, Toast.BOTTOM)
         return
       }
       // Create Room Started...

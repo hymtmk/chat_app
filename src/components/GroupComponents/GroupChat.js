@@ -22,7 +22,7 @@ const GroupChat = ({uri,chatid, myid, groupName,lastMessage,lastTime, navigation
     return(
       <TouchableOpacity style={styles.chatContainer} onPress={onGroupChat}>
           <View style={[styles.img,styles.imgWrapper]}>
-           <Image style={styles.img} source={{uri}}/>
+           <Image style={styles.img} source={uri != '' ? {uri: uri} : require ('../../res/assets/images/profile.png') }/>
           </View>
           <View style={styles.chatUserDetailsWrapper}>
             <Text style={styles.chatUserName}>{groupName}</Text>

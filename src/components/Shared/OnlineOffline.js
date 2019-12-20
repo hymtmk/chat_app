@@ -5,9 +5,10 @@ import {colors} from '../../res/style/colors'
 const OnlineOffline = ({isOnline,userWrapperStyle,userContainerStyle}) =>{
   
     return (
-      <View style={[styles.userStatusWrapper,userWrapperStyle]}>
-        <View style={[styles.userStatusContainer, !isOnline && {backgroundColor:colors.grey},userContainerStyle]}/>
-      </View>
+      <View/>
+      // <View style={[styles.userStatusWrapper,userWrapperStyle]}>
+      //   <View style={[styles.userStatusContainer, !isOnline && {backgroundColor:colors.grey},userContainerStyle]}/>
+      // </View>
     )
 }
 
