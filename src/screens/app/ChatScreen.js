@@ -228,7 +228,7 @@ const ChatScreen = (props) => {
               <View style={[styles.img,{backgroundColor:colors.lightGrey}]}>
                <Image style={styles.img} source={{uri}}/>
               </View>
-              <OnlineOffline userWrapperStyle={styles.userWrapperStyle} userContainerStyle={styles.userContainerStyle} isOnline={status} />
+              <OnlineOffline userWrapperStyle={styles.userWrapperStyle} isOnline={status} />
               <Text style={styles.searchText}>{username}</Text>
           </TouchableOpacity>
          </View>
@@ -359,11 +359,8 @@ const styles = StyleSheet.create({
         borderRadius: 50/2,
    }, 
    userWrapperStyle : {
-        bottom:-2,
-        left:14,
-        width:8,
-        height:8,
-        borderRadius:8/2,
+        bottom:-4,
+        left:20,
    },
    userContainerStyle : {
         width:6,

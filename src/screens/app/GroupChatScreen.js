@@ -154,12 +154,18 @@ const GroupChatScreen = (props) => {
     })
     onMessage = async () => {
       let chatMsg = []
+      const user = await firebase.database()
+        .ref('UserList')
+        .child(myid)
+        .once('value')        
       snapshot = await firebase.database()
       .ref('GroupMessageList')
       .child(chatid)
       .on('child_added', snapshot => {
         const message = {
           key: snapshot.key,
+          userAvatar: user.val().avatar,
+          userName: user.val().name,
           ...snapshot.val()
         }
         if(!isLoaded.current){
@@ -245,8 +251,8 @@ const GroupChatScreen = (props) => {
               return(
                 <View key={chats.key} style={[isSend ? styles.sentContainer : styles.receivedContainer,styles.inverted]}>
                   <View style={{  paddingVertical: 4,paddingHorizontal: 6,}}>
-                    <View style = {styles.msgRow}>
-                      {!isSend && <Image style={styles.img} source={{uri: chats.uri}}/>}
+                    <View style = { !isSend ? styles.msgLRow : styles.msgRRow}>
+                      {!isSend && <Image style={styles.img} source={chats.userAvatar != '' ? {uri: chats.userAvatar} : require ('../../res/assets/images/profile.png') }/>}
                       <View 
                         style={[[styles.bubble,messageType && { paddingVertical: 0,
                           paddingHorizontal: 0,}],isSend ? [styles.sent,styles.sendBorderRadiusStyle,messageType && {backgroundColor:'transparent',padding:0}] : [styles.received,styles.receivedBorderRadiusStyle,messageType && {backgroundColor:'transparent'}]]}>
@@ -360,15 +366,21 @@ const styles = StyleSheet.create({
       justifyContent : 'flex-end',
       alignItems : 'center'
     },
-    msgRow : {
+    msgLRow : {
       flexDirection : 'row',      
       justifyContent : 'space-around',
       alignItems : 'center'
     },
+    msgRRow : {
+      flexDirection : 'row',      
+      justifyContent : 'flex-end',
+      alignItems : 'center'
+    },
     img : {
-        width : 50,
-        height: 50,
-        borderRadius: 50/2,
+        width : 40,
+        height: 40,
+        marginRight: 10,
+        borderRadius: 40/2,
    }, 
    userWrapperStyle : {
         bottom:-2,
